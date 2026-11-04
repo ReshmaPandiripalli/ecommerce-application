@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Registration</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+    <h1>Create Account</h1>
+    <form action="/auth/register" method="POST" id="registerForm">
+        <label>Name:</label>
+        <input type="text" name="name" required>
+        <br><br>
+        <label>Email:</label>
+        <input type="email" name="email" required>
+        <br><br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br><br>
+        <p id="message"></p>
+        <button type="submit">Register</button>
+    </form>
+    <div class="links">
+    <p>Already have an account?
+        <a href="/login">Login here</a>
+    </p>
+    </div>
+    </div>
+    <script>
+    const form = document.getElementById("registerForm");
+    const message = document.getElementById("message");
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        message.textContent = "";
+        try {
+            const response = await fetch("/auth/register", {
+            method: "POST",
+            body: new URLSearchParams(new FormData(form))
+          });
+            const result = await response.json();
+            if (!response.ok) {
+                message.textContent = result.message || "Registration failed";
+                message.style.color = "red";
+                message.style.setProperty("font-size", "20px", "important");
+                message.style.setProperty("font-weight", "bold", "important");
+                message.style.setProperty("font-family", "Arial, sans-serif", "important");
+            }
+            else{
+            message.textContent = result.message || "Registration successful!";
+            message.style.color = "green";
+            form.reset();
+            window.location.href="/login";
+            }
+        } catch (error) {
+            message.textContent = error.message || "Registration failed";
+            message.style.color = "red";
+        }
+    });
+</script>
+</body>
+</html>

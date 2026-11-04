@@ -1,0 +1,67 @@
+\
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Verify OTP</h1>
+        <form id="verifyOtpForm">
+            <label>Enter OTP:</label>
+            <input
+                type="text"
+                id="otp"
+                name="otp"
+                inputmode="numeric"
+                required
+            >
+            <p id="message"></p>
+            <button type="submit">Verify OTP</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById("verifyOtpForm");
+        const message = document.getElementById("message");
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const otp = document.getElementById("otp").value.trim();
+
+            if (!otp) {
+                message.textContent = "OTP is required";
+                message.style.color = "red";
+                return;
+            }
+
+            try {
+                const response = await fetch("/auth/verify-reset-otp", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ otp })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    message.textContent =
+                        result.message || "OTP verification failed";
+                    message.style.color = "red";
+                    return;
+                }
+
+                window.location.href = "/reset-password";
+            } catch (error) {
+                message.textContent =
+                    "Something went wrong. Please try again.";
+                message.style.color = "red";
+            }
+        });
+    </script>
+</body>
+</html>

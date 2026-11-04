@@ -1,0 +1,10 @@
+const express=require("express");
+const router=express.Router();
+const {authMiddleware}=require("../middleware/authMiddleWare");
+const {addToCart,getCart,updateCartItem,clearCart,removeCartItem}=require("../controllers/cartController");
+router.post("/add",authMiddleware,addToCart);
+router.get("/",authMiddleware,getCart);
+router.patch("/update/:productId",authMiddleware,updateCartItem);
+router.delete("/clear",authMiddleware,clearCart);
+router.delete("/remove/:productId",authMiddleware,removeCartItem);
+module.exports=router;

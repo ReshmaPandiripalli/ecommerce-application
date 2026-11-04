@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            min-height: 100vh;
+            padding: 30px 20px;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: #ffffff;
+            background:
+                radial-gradient(circle at top left, #243b70, transparent 45%),
+                radial-gradient(circle at bottom right, #4c1d95, transparent 45%),
+                #080d1c;
+        }
+        .container {
+            width: 100%;
+            max-width: 1150px;
+            margin: 0 auto;
+            padding: 30px;
+            background: rgba(17, 25, 48, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 22px;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(12px);
+        }
+        header {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 0;
+            color: #aab7d0;
+        }
+
+        .layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 22px;
+    width: 100%;
+    text-align:center;
+}
+
+        aside,
+        main {
+            min-width: 0;
+            padding: 22px;
+            background: rgba(12, 20, 41, 0.85);
+            border: 1px solid #303c59;
+            border-radius: 14px;
+        }
+
+        aside h3 {
+            margin-top: 0;
+            color: #e5eaff;
+        }
+
+        main h2 {
+            margin-top: 0;
+        }
+
+        main > p {
+            color: #aab7d0;
+        }
+
+        button {
+            padding: 11px 15px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .sidebar-btn {
+            width: 100%;
+            margin: 7px 0;
+            text-align: center;
+        }
+
+        .secondary {
+            background: #303c59;
+            color: #ffffff;
+        }
+
+        .danger {
+            background: linear-gradient(135deg, #dc3545, #be123c);
+        }
+
+        .product-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            min-width: 0;
+            padding: 18px;
+            overflow-wrap: anywhere;
+            background: #111b35;
+            border: 1px solid #303c59;
+            border-radius: 12px;
+        }
+
+        .product-card h3 {
+            margin-top: 0;
+            color: #ffffff;
+        }
+
+        .product-card p {
+            color: #b8c4dc;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            background: #0c1429;
+            border-radius: 8px;
+        }
+
+        form {
+            width: 100%;
+            max-width: 550px;
+            margin-top: 22px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            margin-bottom: 8px;
+            color: #dbe4f5;
+            font-weight: 600;
+        }
+
+        .field input,
+        .update-field input:not([type="checkbox"]),
+        .image-update input {
+            width: 100%;
+            min-width: 0;
+            padding: 13px;
+            border: 1px solid #303c59;
+            border-radius: 10px;
+            outline: none;
+            background: #0c1429;
+            color: #ffffff;
+            font-size: 14px;
+        }
+
+        input:focus {
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.15);
+        }
+
+        input[type="file"] {
+            color: #b8c4dc;
+        }
+
+        .update-field {
+            display: grid;
+            grid-template-columns: 20px 100px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .update-field input[type="checkbox"] {
+            width: auto;
+            accent-color: #818cf8;
+        }
+
+        .update-field label {
+            color: #dbe4f5;
+            font-weight: 600;
+        }
+
+        .update-field input:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .image-update {
+            margin-top: 20px;
+        }
+
+        .image-update label {
+            display: block;
+            margin-bottom: 9px;
+            color: #dbe4f5;
+            font-weight: 600;
+        }
+
+        #status {
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 8px;
+            overflow-wrap: anywhere;
+        }
+
+        .empty {
+            color: #aab7d0;
+            padding: 20px 0;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        @media (max-width: 750px) {
+            .container {
+                padding: 20px;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+
+            aside {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+
+            aside h3 {
+                grid-column: 1 / -1;
+            }
+
+            .sidebar-btn {
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+            aside,
+            main {
+                padding: 15px;
+            }
+
+            .update-field {
+                grid-template-columns: 20px 1fr;
+            }
+
+            .update-field input:not([type="checkbox"]) {
+                grid-column: 1 / -1;
+            }
+        }
+        .product-card img {
+    width: 100%;
+    height: 220px;
+    object-fit: contain;
+    margin-bottom: 12px;
+    background: #0c1429;
+    border-radius: 8px;
+}
+.product-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+    margin-top: 20px;
+    width: 100%;
+}
+.view-cart-btn {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: fit-content;
+    padding: 12px 25px;
+    margin: 0 0 5px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.manage-address-btn{
+     grid-column: 1 / -1;
+    justify-self: center;
+    width: fit-content;
+    padding: 12px 25px;
+    margin: 0 0 5px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.my-orders-btn{
+      grid-column: 1 / -1;
+    justify-self: center;
+    width: fit-content;
+    padding: 12px 25px;
+    margin: 0 0 5px;
+    background: linear-gradient(135deg, #0ea5e9, #2563eb);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.product-list {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 22px;
+}
+
+#productList > .view-cart-btn,
+#productList > .my-orders-btn,
+#productList > .manage-address-btn {
+    grid-column: auto;
+    justify-self: center;
+    width: fit-content;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.product-card > button {
+    margin: 8px 5px;
+}
+
+.product-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.product-card > button {
+    align-self: center;
+    min-width: 130px;
+}
+.dashboard-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 10px;
+    width: 100%;
+    align-items: center;
+}
+
+.dashboard-actions button {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+.filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+    align-items: center;
+}
+
+.filter-container input,
+.filter-container select {
+    padding: 11px;
+    border: 1px solid #d4d6e2;
+    border-radius: 7px;
+    min-width: 130px;
+    flex: 1;
+}
+
+.filter-container button {
+    padding: 11px 16px;
+}
+
+@media (max-width: 700px) {
+    .filter-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-container input,
+    .filter-container select,
+    .filter-container button {
+        width: 100%;
+    }
+}
+
+@media (max-width: 750px) {
+    .dashboard-actions {
+        grid-column: 1 / -1;
+        overflow-x: auto;
+    }
+
+    .dashboard-actions button {
+        flex: 0 0 auto;
+    }
+}
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>Product Management</h1>
+        <p>Manage your products in one place.</p>
+        <br>
+        <button id="logoutButton">Logout</button>
+    </header>
+    <div class="layout">
+        <aside>
+            <h3>Dashboard</h3>
+            <button type="button" class="sidebar-btn" id="createButton" hidden>Create Product</button>
+            <button type="button" class="sidebar-btn" id="getOneButton"> Get Product</button>
+            <button
+                type="button"
+                class="sidebar-btn"
+                id="getAllButton"
+            >
+                Get All Products
+            </button>
+            <button
+    type="button"
+    class="sidebar-btn"
+    id="orderManagementButton"
+    hidden
+>
+    Order Management
+</button>
+        </aside>
+        <main>
+            <h2 id="panelTitle">All Products</h2>
+            <p id="panelDescription">
+                View and manage your products.
+            </p>
+            <div class="filter-container">
+
+    <input
+        type="text"
+        id="searchInput"
+        placeholder="Search product name"
+    >
+
+    <input
+        type="text"
+        id="categoryInput"
+        placeholder="Enter category"
+    >
+
+    <input
+        type="number"
+        id="minPrice"
+        placeholder="Min Price"
+        min="0"
+    >
+
+    <input
+        type="number"
+        id="maxPrice"
+        placeholder="Max Price"
+        min="0"
+    >
+
+    <select id="sortOption">
+        <option value="">Default Sorting</option>
+        <option value="price_asc">Price: Low to High</option>
+        <option value="price_desc">Price: High to Low</option>
+        <option value="newest">Newest First</option>
+        <option value="oldest">Oldest First</option>
+    </select>
+
+    <button type="button" id="applyFilter">
+        Apply Filters
+    </button>
+
+    <button type="button" id="clearFilter" class="secondary">
+        Clear
+    </button>
+
+</div>
+            <div id="status" hidden></div>
+            <form id="productForm" hidden>
+                <div id="fields"></div>
+                <button type="submit" id="submitButton">
+                    Submit
+                </button>
+                <button
+                    type="button"
+                    class="secondary"
+                    id="cancelButton"
+                >
+                    Cancel
+                </button>
+            </form>
+            <div id="productList" class="product-list"></div>
+        </main>
+    </div>
+</div>
+<script>
+    async function applyProductFilters() {
+
+    const keyword = document.getElementById("searchInput").value.trim();
+
+    const category = document.getElementById("categoryInput").value.trim();
+
+    const minPrice = document.getElementById("minPrice").value;
+
+    const maxPrice = document.getElementById("maxPrice").value;
+
+    const sort = document.getElementById("sortOption").value;
+
+    const params = new URLSearchParams();
+
+    if (keyword) {
+        params.append("keyword", keyword);
+    }
+
+    if (category) {
+        params.append("category", category);
+    }
+
+    if (minPrice !== "") {
+        params.append("minPrice", minPrice);
+    }
+
+    if (maxPrice !== "") {
+        params.append("maxPrice", maxPrice);
+    }
+
+    if (sort) {
+        params.append("sort", sort);
+    }
+
+    closeForm();
+    showStatus("");
+
+    panelTitle.textContent = "Filtered Products";
+    panelDescription.textContent = "Products matching your filters.";
+
+    productList.hidden = false;
+    productList.replaceChildren();
+
+    try {
+
+        const products = await api(
+            `/products?${params.toString()}`
+        );
+
+        if (!Array.isArray(products)) {
+            throw new Error("Invalid product response.");
+        }
+
+        if (products.length === 0) {
+            productList.innerHTML =
+                '<p class="empty">No matching products found.</p>';
+
+            showStatus("No products found.");
+            return;
+        }
+
+        renderProducts(products);
+
+        showStatus(`${products.length} product(s) found.`);
+
+    } catch (error) {
+        showStatus(error.message, true);
+    }
+}
+    const productList = document.getElementById("productList");
+    const form = document.getElementById("productForm");
+    const fields = document.getElementById("fields");
+    const statusBox = document.getElementById("status");
+    const panelTitle = document.getElementById("panelTitle");
+    const panelDescription = document.getElementById("panelDescription");
+    const submitButton = document.getElementById("submitButton");
+    let currentAction = null;
+    let currentProductId = null;
+    let currentUser = null;
+let refreshPromise = null;
+async function api(url, options = {}) {
+    async function sendRequest() {
+        const headers = { ...options.headers };
+        const isFormData = options.body instanceof FormData;
+
+        if (options.body !== undefined && !isFormData) {
+            headers["Content-Type"] = "application/json";
+        }
+
+        return fetch(url, {
+            ...options,
+            headers,
+            credentials: "same-origin",
+            body: options.body === undefined
+                ? undefined
+                : isFormData
+                    ? options.body
+                    : JSON.stringify(options.body)
+        });
+    }
+
+    let response = await sendRequest();
+
+    if (response.status === 401) {
+
+        if (!refreshPromise) {
+            refreshPromise = fetch("/auth/new-access-token", {
+                method: "POST",
+                credentials: "same-origin"
+            }).finally(() => {
+                refreshPromise = null;
+            });
+        }
+
+        const refreshResponse = await refreshPromise;
+
+        if (!refreshResponse.ok) {
+            window.location.replace("/login");
+            throw new Error("Session expired. Please login again.");
+        }
+
+        response = await sendRequest();
+
+        if (response.status === 401) {
+            window.location.replace("/login");
+            throw new Error("Please login again.");
+        }
+    }
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+        throw new Error(data.message || "Request failed");
+    }
+    return data;
+}
+    function showStatus(message, isError = false) {
+        statusBox.textContent = message;
+        statusBox.hidden = !message;
+        statusBox.style.background = isError
+            ? "#ffe5e8"
+            : "#e5f8ec";
+        statusBox.style.color = isError
+            ? "#b42338"
+            : "#176b38";
+    }
+    function closeForm() {
+        form.reset();
+        form.hidden = true;
+        fields.replaceChildren();
+
+        currentAction = null;
+        currentProductId = null;
+
+        productList.hidden = false;
+    }
+    function addInput(
+        labelText,
+        name,
+        value = "",
+        type = "text",
+        multiple = false
+    ) {
+        const wrapper = document.createElement("div");
+        wrapper.className = "field";
+        const label = document.createElement("label");
+        label.textContent = labelText;
+        label.htmlFor = name;
+
+        const input = document.createElement("input");
+
+        input.id = name;
+        input.name = name;
+        input.type = type;
+
+        if (type === "file") {
+            input.accept = "image/*";
+            input.multiple = multiple;
+        } else {
+            input.value = value;
+        }
+
+        if (type === "number") {
+            input.step = "any";
+        }
+
+        input.required = true;
+
+        wrapper.append(label, input);
+        fields.appendChild(wrapper);
+    }
+
+
+    // GET CURRENT USER
+
+    async function getCurrentUser() {
+        try {
+            currentUser = await api("/auth/me");
+            const isAdmin = currentUser.role === "admin";
+            document.getElementById("createButton").hidden = !isAdmin;
+            document.getElementById("orderManagementButton").hidden = !isAdmin;
+            const logoutButton = document.getElementById("logoutButton");
+            if (isAdmin) {
+                logoutButton.hidden = TextTrackCue;
+            }
+        } catch (error) {
+            currentUser = null;
+            showStatus(error.message, true);
+            console.error("Failed to fetch current user:", error);
+        }
+    }
+    function openCreateForm() {
+        if (!currentUser || currentUser.role !== "admin") {
+            showStatus("You are not authorized to create products.", true);
+            return;
+        }
+        currentAction = "create";
+        currentProductId = null;
+        fields.replaceChildren();
+        addInput("Product Name", "name");
+        addInput("Category", "category");
+        addInput("Price", "price", "", "number");
+        addInput("Quantity", "quantity", "", "number");
+        addInput("Product Images", "images", "", "file", true);
+        panelTitle.textContent = "Create Product";
+
+        panelDescription.textContent =
+            "Enter product details and select product images.";
+
+        submitButton.textContent = "Create Product";
+
+        form.hidden = false;
+        productList.hidden = true;
+
+        showStatus("");
+    }
+    document.getElementById("logoutButton").addEventListener("click", async () => {
+    try {
+        const response = await fetch("/auth/logout", {
+            method: "POST",
+            credentials: "same-origin"
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.message || "Logout failed");
+        }
+        alert("Logged out successfully!");
+        window.location.href = "/login";
+
+    } catch (error) {
+        alert(error.message);
+    }
+});
+    async function loadProducts() {
+
+        closeForm();
+        showStatus("");
+
+        panelTitle.textContent = "All Products";
+
+        panelDescription.textContent =
+            "Showing all products in the database.";
+
+        productList.hidden = false;
+        productList.replaceChildren();
+
+        try {
+
+            const products = await api("/products");
+            if (!Array.isArray(products)) {
+                throw new Error("Expected a list of products.");
+            }
+            if (products.length === 0) {
+
+                productList.innerHTML =
+                    '<p class="empty">No products found.</p>';
+
+                return;
+            }
+
+            renderProducts(products);
+
+            showStatus(`${products.length} product(s) found.`);
+
+        } catch (error) {
+
+            showStatus(error.message, true);
+        }
+    }
+    async function getSingleProduct() {
+        const id = prompt("Enter the product ID:");
+        if (!id || !id.trim()) {
+            return;
+        }
+        closeForm();
+        showStatus("");
+
+        panelTitle.textContent = "Get Product";
+
+        panelDescription.textContent =
+            "Showing only the selected product.";
+
+        productList.hidden = false;
+        productList.replaceChildren();
+
+        try {
+
+            const product = await api(
+                `/products/${encodeURIComponent(id.trim())}`
+            );
+
+            if (!product || !product.productId) {
+                throw new Error("Product not found.");
+            }
+            renderProducts([product]);
+            showStatus("One product found.");
+        } catch (error) {
+
+            showStatus(error.message, true);
+        }
+    }
+function renderProducts(products) {
+    productList.replaceChildren();
+
+    products.forEach(product => {
+        const card = document.createElement("div");
+        card.className = "product-card";
+
+        const title = document.createElement("h3");
+        title.textContent = product.name;
+        card.appendChild(title);
+
+        if (product.images && product.images.length > 0) {
+            const img = document.createElement("img");
+            img.src = product.images[0];
+            img.alt = product.name;
+            card.appendChild(img);
+        }
+
+        const id = document.createElement("p");
+        id.textContent = `Product ID: ${product.productId}`;
+
+        const category = document.createElement("p");
+        category.textContent = `Category: ${product.category}`;
+
+        const price = document.createElement("p");
+        price.textContent = `Price: ₹${product.price}`;
+
+        const quantity = document.createElement("p");
+        quantity.textContent = `Quantity: ${product.quantity}`;
+
+        card.append(id, category, price, quantity);
+
+        const viewButton = document.createElement("button");
+        viewButton.textContent = "View";
+        viewButton.addEventListener("click", () => {
+            getProductById(product.productId);
+        });
+
+        card.appendChild(viewButton);
+        if (currentUser && currentUser.role === "admin") {
+            const updateButton = document.createElement("button");
+            updateButton.textContent = "Update";
+            updateButton.addEventListener("click", () => {
+                openUpdateForm(product);
+            });
+
+            const deleteButton = document.createElement("button");
+            deleteButton.textContent = "Delete";
+            deleteButton.className = "danger";
+            deleteButton.addEventListener("click", () => {
+                deleteProduct(product.productId);
+            });
+
+            card.append(updateButton, deleteButton);
+        }
+
+        // Normal user buttons
+      else {
+    // ADD TO WISHLIST BUTTON
+    const wishlistButton = document.createElement("button");
+    wishlistButton.textContent = "❤️ Add to Wishlist";
+
+    wishlistButton.addEventListener("click", async () => {
+        try {
+            await api(`/wishlist/add/${encodeURIComponent(product._id)}`, {
+                method: "POST"
+            });
+
+            alert("Product added to wishlist!");
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    // ADD TO CART BUTTON
+    const addToCartButton = document.createElement("button");
+    addToCartButton.textContent = "Add to Cart";
+    addToCartButton.className = "add-to-cart-btn";
+
+    addToCartButton.addEventListener("click", async () => {
+        try {
+            const data = await api("/cart/add", {
+                method: "POST",
+                body: {
+                    productId: product._id
+                }
+            });
+
+            alert("Product added to cart!");
+
+        } catch (error) {
+            alert(error.message);
+        }
+    });
+
+    // BUY NOW BUTTON
+    const buyNowButton = document.createElement("button");
+    buyNowButton.textContent = "Buy Now";
+    buyNowButton.className = "buy-now-btn";
+
+    buyNowButton.addEventListener("click", () => {
+        window.location.href =
+            `/checkout-page?buyNow=${product.productId}`;
+    });
+
+    card.append(
+        wishlistButton,
+        addToCartButton,
+        buyNowButton
+    );
+}
+
+        productList.appendChild(card);
+    });
+
+    // Common buttons for normal users
+    // Common buttons for normal users
+if (currentUser && currentUser.role !== "admin") {
+        const viewWishlistButton = document.createElement("button");
+        viewWishlistButton.textContent = "❤️ View Wishlist";
+        viewWishlistButton.className = "view-cart-btn";
+
+        viewWishlistButton.addEventListener("click", () => {
+            window.location.href = "/wishlist-page";
+        });
+
+    const viewCartButton = document.createElement("button");
+    viewCartButton.textContent = "View Cart";
+    viewCartButton.className = "view-cart-btn";
+
+    viewCartButton.addEventListener("click", () => {
+        window.location.href = "/cart-page";
+    });
+
+    const myOrdersButton = document.createElement("button");
+    myOrdersButton.textContent = "My Orders";
+    myOrdersButton.className = "my-orders-btn";
+
+    myOrdersButton.addEventListener("click", () => {
+        window.location.href = "/my-orders-page";
+    });
+
+    const manageAddressButton = document.createElement("button");
+    manageAddressButton.textContent = "Manage Addresses";
+    manageAddressButton.className = "manage-address-btn";
+
+    manageAddressButton.addEventListener("click", () => {
+        window.location.href = "/address-page";
+    });
+
+    productList.prepend(
+        viewCartButton,
+        myOrdersButton,
+        manageAddressButton,viewWishlistButton
+    );
+}
+}
+    async function getProductById(id) {
+        closeForm();
+        showStatus("");
+        productList.replaceChildren();
+        panelTitle.textContent = "Product Details";
+        panelDescription.textContent =
+            "Showing one selected product.";
+        try {
+
+            const product = await api(
+                `/products/${encodeURIComponent(id)}`
+            );
+
+            if (!product || !product.productId) {
+                throw new Error("Product not found.");
+            }
+
+            renderProducts([product]);
+
+            showStatus("Product details loaded.");
+
+        } catch (error) {
+
+            showStatus(error.message, true);
+        }
+    }
+    // UPDATE PRODUCT FORM
+    function openUpdateForm(product) {
+        if (!currentUser || currentUser.role !== "admin") {
+            showStatus("You are not authorized to update products.", true);
+            return;
+        }
+        currentAction = "update";
+        currentProductId = product.productId;
+        fields.replaceChildren();
+        const productFields = [
+            { label: "Product Name", name: "name", type: "text" },
+            { label: "Category", name: "category", type: "text" },
+            { label: "Price", name: "price", type: "number" },
+            { label: "Quantity", name: "quantity", type: "number" }
+        ];
+        productFields.forEach(item => {
+            const wrapper = document.createElement("div");
+            wrapper.className = "update-field";
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.name = `select_${item.name}`;
+            checkbox.id = `select_${item.name}`;
+            const label = document.createElement("label");
+            label.htmlFor = checkbox.id;
+            label.textContent = item.label;
+            const input = document.createElement("input");
+            input.type = item.type;
+            input.name = item.name;
+            input.value = product[item.name] ?? "";
+            input.required = false;
+            input.disabled = true;
+
+            if (item.type === "number") {
+                input.step = "any";
+            }
+            checkbox.addEventListener("change", () => {
+
+                input.disabled = !checkbox.checked;
+                input.required = checkbox.checked;
+            });
+
+            wrapper.append(checkbox, label, input);
+
+            fields.appendChild(wrapper);
+        });
+
+
+        // OPTIONAL MULTIPLE IMAGE UPLOAD
+
+        const imageWrapper = document.createElement("div");
+        imageWrapper.className = "image-update";
+
+        const imageLabel = document.createElement("label");
+        imageLabel.textContent = "Update Product Images";
+
+        const imageInput = document.createElement("input");
+
+        imageInput.type = "file";
+        imageInput.name = "images";
+        imageInput.accept = "image/*";
+        imageInput.multiple = true;
+        imageInput.required = false;
+
+        imageWrapper.append(imageLabel, imageInput);
+
+        fields.appendChild(imageWrapper);
+
+        panelTitle.textContent = "Update Product";
+
+        panelDescription.textContent =
+            "Select the checkboxes for fields you want to update, or upload new images.";
+
+        submitButton.textContent = "Save Changes";
+
+        form.hidden = false;
+        productList.hidden = true;
+
+        showStatus("");
+    }
+
+
+    // DELETE PRODUCT
+
+    async function deleteProduct(id) {
+
+        if (!currentUser || currentUser.role !== "admin") {
+            showStatus("You are not authorized to delete products.", true);
+            return;
+        }
+
+        if (!confirm("Are you sure you want to delete this product?")) {
+            return;
+        }
+
+        try {
+
+            await api(`/products/${encodeURIComponent(id)}`, {
+                method: "DELETE"
+            });
+
+            showStatus("Product deleted successfully.");
+
+            await loadProducts();
+
+        } catch (error) {
+
+            showStatus(error.message, true);
+        }
+    }
+
+    form.addEventListener("submit", async event => {
+
+        event.preventDefault();
+
+        showStatus("");
+
+        try {
+            if (currentAction === "create") {
+
+                if (!currentUser || currentUser.role !== "admin") {
+                    throw new Error("You are not authorized to create products.");
+                }
+
+                const data = {};
+
+                data.name =
+                    fields.querySelector('[name="name"]').value.trim();
+
+                data.category =
+                    fields.querySelector('[name="category"]').value.trim();
+
+                const priceInput =
+                    fields.querySelector('[name="price"]');
+
+                const quantityInput =
+                    fields.querySelector('[name="quantity"]');
+
+                data.price = Number(priceInput.value);
+                data.quantity = Number(quantityInput.value);
+
+                if (
+                    !data.name ||
+                    !data.category ||
+                    priceInput.value === "" ||
+                    quantityInput.value === "" ||
+                    !Number.isFinite(data.price) ||
+                    !Number.isFinite(data.quantity) ||
+                    data.price < 0 ||
+                    data.quantity < 0
+                ) {
+                    throw new Error("Enter valid product details.");
+                }
+                const formData = new FormData();
+                formData.append("name", data.name);
+                formData.append("category", data.category);
+                formData.append("price", data.price);
+                formData.append("quantity", data.quantity);
+                const imageFiles =
+                    fields.querySelector('[name="images"]').files;
+
+                for (let i = 0; i < imageFiles.length; i++) {
+                    formData.append("images", imageFiles[i]);
+                }
+                await api("/products", {
+                    method: "POST",
+                    body: formData
+                });
+
+                closeForm();
+
+                await loadProducts();
+
+                showStatus("Product created successfully.");
+            }
+            else if (currentAction === "update") {
+
+                if (!currentUser || currentUser.role !== "admin") {
+                    throw new Error("You are not authorized to update products.");
+                }
+
+                const data = {};
+
+                const names = [
+                    "name",
+                    "category",
+                    "price",
+                    "quantity"
+                ];
+
+                names.forEach(name => {
+
+                    const checkbox =
+                        fields.querySelector(`[name="select_${name}"]`);
+
+                    if (checkbox.checked) {
+
+                        const input =
+                            fields.querySelector(`[name="${name}"]`);
+
+                        if (input.value.trim() === "") {
+                            throw new Error(`${name} cannot be empty.`);
+                        }
+
+                        data[name] =
+                            name === "price" || name === "quantity"
+                                ? Number(input.value)
+                                : input.value.trim();
+
+                        if (
+                            (name === "price" || name === "quantity") &&
+                            (
+                                !Number.isFinite(data[name]) ||
+                                data[name] < 0
+                            )
+                        ) {
+                            throw new Error(
+                                `${name} must be a valid number.`
+                            );
+                        }
+                    }
+                });
+
+                const imageInput =
+                    fields.querySelector('[name="images"]');
+
+                const imageFiles = imageInput.files;
+
+                if (
+                    Object.keys(data).length === 0 &&
+                    imageFiles.length === 0
+                ) {
+                    throw new Error(
+                        "Select at least one field or image to update."
+                    );
+                }
+
+                const formData = new FormData();
+
+                Object.keys(data).forEach(key => {
+                    formData.append(key, data[key]);
+                });
+
+                for (let i = 0; i < imageFiles.length; i++) {
+                    formData.append("images", imageFiles[i]);
+                }
+
+                await api(
+                    `/products/${encodeURIComponent(currentProductId)}`,
+                    {
+                        method: "PATCH",
+                        body: formData
+                    }
+                );
+
+                closeForm();
+
+                await loadProducts();
+
+                showStatus("Product updated successfully.");
+            }
+        } catch (error) {
+
+            showStatus(error.message, true);
+        }
+    });
+    document.getElementById("createButton")
+        .addEventListener("click", openCreateForm);
+
+    document.getElementById("getOneButton")
+        .addEventListener("click", getSingleProduct);
+
+    document.getElementById("getAllButton")
+    .addEventListener("click", () => {
+
+        document.getElementById("searchInput").value = "";
+        document.getElementById("categoryInput").value = "";
+        document.getElementById("minPrice").value = "";
+        document.getElementById("maxPrice").value = "";
+        document.getElementById("sortOption").value = "";
+
+        loadProducts();
+    });
+    document.getElementById("cancelButton")
+        .addEventListener("click", () => {
+            closeForm();
+            showStatus("");
+        });
+        document.getElementById("orderManagementButton")
+    .addEventListener("click", () => {
+        window.location.href = "/admin-orders-page";
+    });
+    document.getElementById("applyFilter")
+    .addEventListener("click", applyProductFilters);
+
+document.getElementById("clearFilter")
+    .addEventListener("click", () => {
+
+        document.getElementById("searchInput").value = "";
+        document.getElementById("categoryInput").value = "";
+        document.getElementById("minPrice").value = "";
+        document.getElementById("maxPrice").value = "";
+        document.getElementById("sortOption").value = "";
+
+        loadProducts();
+    });
+    async function initializePage() {
+        await getCurrentUser();
+        if (!currentUser) {
+            return;
+        }
+        await loadProducts();
+    }
+    initializePage();
+
+</script>
+
+</body>
+</html>

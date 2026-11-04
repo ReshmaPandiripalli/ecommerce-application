@@ -1,0 +1,10 @@
+const {addAddress, getAddress, updateAddress, deleteAddress,setDefaultAddress} = require('../controllers/addressController');
+const express=require('express');
+const router=express.Router();
+const {authMiddleware}=require('../middleware/authMiddleWare');
+router.post('/',authMiddleware,addAddress);
+router.get('/',authMiddleware,getAddress);
+router.patch('/:id',authMiddleware,updateAddress);
+router.delete('/:id',authMiddleware,deleteAddress);
+router.patch('/:id/default',authMiddleware,setDefaultAddress);
+module.exports=router;

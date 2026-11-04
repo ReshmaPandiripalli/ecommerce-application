@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 35px 20px;
+            font-family: Arial, sans-serif;
+            background: #111930;
+            color: #333;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+        }
+
+        h2 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .section {
+            margin-bottom: 35px;
+        }
+
+        .address-card,
+        .cart-card {
+            background: #a7ad78;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .address-card label {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            cursor: pointer;
+        }
+
+        .address-card input[type="radio"] {
+            margin-top: 5px;
+            accent-color: #316a53;
+            width: 18px;
+            height: 18px;
+        }
+
+        .address-details {
+            flex: 1;
+        }
+
+        .address-details h3,
+        .cart-card h3 {
+            margin: 0 0 10px;
+            color: #222;
+        }
+
+        .address-details p,
+        .cart-card p {
+            margin: 7px 0;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .default-label {
+            color: #198754 !important;
+            font-weight: bold;
+        }
+
+        .add-address {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #c4e65c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .add-address:hover {
+            text-decoration: underline;
+        }
+
+        .cart-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .cart-info {
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .item-subtotal {
+            font-weight: bold;
+            color: #316a53 !important;
+        }
+
+        .total-box {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .total-box h3 {
+            margin: 0;
+            color: #222;
+        }
+
+        #totalAmount {
+            color: #198754;
+            font-size: 22px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 7px;
+            background: #316a53;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #244f3e;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .continue-wrapper {
+            text-align: right;
+            margin-top: 25px;
+        }
+
+        .message {
+            color: white;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        #successMessage {
+            display: none;
+            background: #d1fae5;
+            color: #065f46;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media(max-width: 600px) {
+            body {
+                padding: 20px 12px;
+            }
+
+            h2 {
+                font-size: 21px;
+            }
+
+            .address-card,
+            .cart-card {
+                padding: 15px;
+            }
+
+            .total-box {
+                gap: 12px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .continue-wrapper {
+                text-align: center;
+            }
+
+            .continue-wrapper button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div id="checkoutContent">
+
+        <div class="section">
+            <h2>Select Delivery Address</h2>
+
+            <a href="/address-page" class="add-address">
+                Add New Address
+            </a>
+
+            <div id="addressContainer">
+                <p class="message">Loading addresses...</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Order Summary</h2>
+
+            <div id="cartContainer">
+                <p class="message">Loading products...</p>
+            </div>
+
+            <div class="total-box">
+                <h3>Grand Total</h3>
+                <h3 id="totalAmount">₹0</h3>
+            </div>
+        </div>
+
+        <div class="continue-wrapper">
+            <button type="button" id="continueButton">
+                Place Order
+            </button>
+        </div>
+
+    </div>
+
+    <div id="successMessage">
+        <h2 style="color:#065f46;">Order Placed Successfully!</h2>
+        <p id="orderDetails"></p>
+        <button type="button" onclick="window.location.href='/product-page'">
+            Continue Shopping
+        </button>
+    </div>
+
+</div>
+
+<script>
+    // READ BUY NOW PRODUCT ID FROM URL
+
+    const params = new URLSearchParams(window.location.search);
+
+    const buyNowProductId = params.get("buyNow");
+
+    const isBuyNow = buyNowProductId !== null &&
+                     buyNowProductId !== "";
+
+    // DOM ELEMENTS
+
+    const addressContainer =
+        document.getElementById("addressContainer");
+
+    const cartContainer =
+        document.getElementById("cartContainer");
+
+    const totalAmount =
+        document.getElementById("totalAmount");
+
+    const continueButton =
+        document.getElementById("continueButton");
+
+    const checkoutContent =
+        document.getElementById("checkoutContent");
+
+    const successMessage =
+        document.getElementById("successMessage");
+
+    const orderDetails =
+        document.getElementById("orderDetails");
+
+    let selectedAddressId = null;
+    let cartTotal = 0;
+    let productsLoaded = false;
+
+    // FETCH ADDRESSES
+
+    async function fetchAddresses() {
+        try {
+            const response = await fetch("/address", {
+                credentials: "same-origin"
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Failed to fetch addresses");
+            }
+
+            displayAddresses(data.addresses || []);
+
+        } catch (error) {
+            console.error(error);
+            addressContainer.textContent = error.message;
+        }
+    }
+
+    // DISPLAY ADDRESSES
+
+    function displayAddresses(addresses) {
+        addressContainer.replaceChildren();
+
+        if (!addresses || addresses.length === 0) {
+            selectedAddressId = null;
+            addressContainer.textContent =
+                "No saved addresses found. Please add an address.";
+            return;
+        }
+
+        const defaultAddress = addresses.find(
+            address => address.isDefault
+        );
+
+        selectedAddressId = defaultAddress
+            ? defaultAddress._id
+            : addresses[0]._id;
+
+        addresses.forEach(address => {
+            const card = document.createElement("div");
+            card.className = "address-card";
+
+            const label = document.createElement("label");
+
+            const radio = document.createElement("input");
+            radio.type = "radio";
+            radio.name = "deliveryAddress";
+            radio.value = address._id;
+            radio.checked = address._id === selectedAddressId;
+
+            radio.addEventListener("change", () => {
+                selectedAddressId = address._id;
+            });
+
+            const details = document.createElement("div");
+            details.className = "address-details";
+
+            const name = document.createElement("h3");
+            name.textContent = address.fullName;
+
+            const phone = document.createElement("p");
+            phone.textContent = "Phone: " + address.phone;
+
+            const addressLine = document.createElement("p");
+            addressLine.textContent = address.addressLine;
+
+            const location = document.createElement("p");
+            location.textContent =
+                `${address.city}, ${address.state} - ${address.pincode}`;
+
+            details.append(name, phone, addressLine, location);
+
+            if (address.isDefault) {
+                const defaultLabel = document.createElement("p");
+                defaultLabel.className = "default-label";
+                defaultLabel.textContent = "Default Address";
+                details.appendChild(defaultLabel);
+            }
+
+            label.append(radio, details);
+            card.appendChild(label);
+            addressContainer.appendChild(card);
+        });
+    }
+
+    // FETCH BUY NOW PRODUCT OR CART PRODUCTS
+
+    async function fetchCart() {
+        try {
+            let response;
+
+            if (isBuyNow) {
+                const numericProductId = Number(buyNowProductId);
+
+                if (
+                    !Number.isSafeInteger(numericProductId) ||
+                    numericProductId <= 0
+                ) {
+                    throw new Error("Invalid product ID");
+                }
+
+                response = await fetch(
+                    `/products/${encodeURIComponent(numericProductId)}`,
+                    { credentials: "same-origin" }
+                );
+
+            } else {
+                response = await fetch("/cart/", {
+                    credentials: "same-origin"
+                });
+            }
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Unable to fetch products"
+                );
+            }
+
+            if (isBuyNow) {
+                const product = data.product || data;
+
+                if (!product || !product._id) {
+                    throw new Error("Product not found");
+                }
+
+                // Show ONLY the selected Buy Now product.
+                displayCart([
+                    {
+                        product: product,
+                        quantity: 1
+                    }
+                ]);
+
+            } else {
+                const cart = data.cart || data;
+
+                // Show all products from the cart.
+                displayCart(cart.items || []);
+            }
+
+            productsLoaded = true;
+
+        } catch (error) {
+            console.error(error);
+            cartContainer.textContent = error.message;
+            productsLoaded = false;
+        }
+    }
+
+    // DISPLAY PRODUCTS
+
+    function displayCart(items) {
+        cartContainer.replaceChildren();
+        cartTotal = 0;
+
+        if (!items || items.length === 0) {
+            cartContainer.textContent = "Your cart is empty.";
+            totalAmount.textContent = "₹0";
+            return;
+        }
+
+        items.forEach(item => {
+            const product = item.product;
+
+            if (!product) {
+                return;
+            }
+
+            const productCard = document.createElement("div");
+            productCard.className = "cart-card";
+
+            const info = document.createElement("div");
+            info.className = "cart-info";
+
+            const name = document.createElement("h3");
+            name.textContent = product.name;
+
+            const price = document.createElement("p");
+            price.textContent = `Price: ₹${product.price}`;
+
+            const quantity = document.createElement("p");
+            quantity.textContent = `Quantity: ${item.quantity}`;
+
+            const subtotal =
+                Number(product.price) * Number(item.quantity);
+
+            const itemTotal = document.createElement("p");
+            itemTotal.className = "item-subtotal";
+            itemTotal.textContent = `Subtotal: ₹${subtotal}`;
+
+            info.append(name, price, quantity, itemTotal);
+            productCard.appendChild(info);
+            cartContainer.appendChild(productCard);
+
+            cartTotal += subtotal;
+        });
+
+        totalAmount.textContent = `₹${cartTotal}`;
+    }
+
+    // PLACE ORDER
+
+    continueButton.addEventListener("click", async () => {
+
+        if (!selectedAddressId) {
+            alert("Please select a delivery address");
+            return;
+        }
+
+        if (!productsLoaded || cartTotal <= 0) {
+            alert("No valid products available for checkout");
+            return;
+        }
+
+        try {
+            continueButton.disabled = true;
+            continueButton.textContent = "Placing Order...";
+            const orderPayload = {
+                addressId: selectedAddressId,
+                paymentMethod: "COD",
+                buyNowProductId: isBuyNow
+                    ? Number(buyNowProductId)
+                    : null
+            };
+            console.log("Order payload:", orderPayload);
+            const response = await fetch("/orders", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                credentials: "same-origin",
+                body: JSON.stringify(orderPayload)
+            });
+            const data = await response.json();
+            console.log("Order response:", data);
+            if (!response.ok) {
+                throw new Error(
+                    data.message || "Order placement failed"
+                );
+            }
+            checkoutContent.style.display = "none";
+            successMessage.style.display = "block";
+            orderDetails.textContent =
+            `Order ID: ${data.order._id} | Total: ₹${data.order.totalAmount}`;
+        } catch (error) {
+            console.error(error);
+            alert(error.message);
+        } finally {
+            continueButton.disabled = false;
+            continueButton.textContent = "Place Order";
+        }
+    });
+    fetchAddresses();
+    fetchCart();
+
+</script>
+
+</body>
+</html>

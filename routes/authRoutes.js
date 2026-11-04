@@ -1,0 +1,14 @@
+const {registeredUser,loginUser,newAccessToken,forgotPassword,verifyResetOtp,resetPassword,logoutUser,createInitialAdmin,getCurrentUser}=require("../controllers/authController");
+const{authMiddleware}=require("../middleware/authMiddleWare");
+const express=require("express");
+const router=express.Router();
+router.post("/register",registeredUser);
+router.post("/login",loginUser);
+router.post("/forgot-password",forgotPassword);
+router.post("/verify-reset-otp",verifyResetOtp);
+router.post("/reset-password",resetPassword);
+router.post("/new-access-token",newAccessToken);
+router.post("/logout", logoutUser);
+router.post("/initial-admin",createInitialAdmin);
+router.get("/me", authMiddleware, getCurrentUser);
+module.exports=router;

@@ -1,0 +1,454 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Addresses</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+            background: rgba(17, 25, 48, 0.92);
+            color: #333;
+        }
+        .container {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        #addressContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        .address-card {
+            background: white;
+            padding: 22px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .address-card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .address-card p {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .default-label {
+            display: inline-block;
+            color: #198754;
+            font-weight: bold;
+            margin: 8px 0 12px;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin: 8px 8px 0 0;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #0d6efd;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.88;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .default-btn {
+            background: #198754;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+        }
+
+        .address-form-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        #addressForm {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        #addressForm input[type="text"],
+        #addressForm textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            font-family: Arial, sans-serif;
+        }
+
+        #addressForm textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        #addressForm input:focus,
+        #addressForm textarea:focus {
+            outline: none;
+            border-color: #0d6efd;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-buttons {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .empty-message {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 15px;
+            }
+
+            .address-card,
+            .address-form-card {
+                padding: 18px;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+
+            .form-buttons button {
+                width: 100%;
+                margin-right: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>My Saved Addresses</h2>
+
+        <div id="addressContainer"></div>
+
+        <div class="address-form-card">
+
+            <h2 id="formHeading">Add New Address</h2>
+
+            <form id="addressForm">
+
+                <input type="text" id="fullName"
+                    placeholder="Full Name" required>
+
+                <input type="text" id="phone"
+                    placeholder="Phone Number" required>
+
+                <textarea id="addressLine"
+                    placeholder="Address Line" required></textarea>
+
+                <input type="text" id="city"
+                    placeholder="City" required>
+
+                <input type="text" id="state"
+                    placeholder="State" required>
+
+                <input type="text" id="pincode"
+                    placeholder="Pincode" required>
+
+                <label class="checkbox-container">
+                    <input type="checkbox" id="isDefault">
+                    Set as default address
+                </label>
+
+                <div class="form-buttons">
+                    <button type="submit" id="saveButton">
+                        Save Address
+                    </button>
+
+                    <button type="button" class="cancel-btn"
+                        id="cancelButton" onclick="cancelEdit()"
+                        style="display:none;">
+                        Cancel Edit
+                    </button>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        const addressContainer = document.getElementById('addressContainer');
+        const addressForm = document.getElementById('addressForm');
+
+        let selectedAddressId = null;
+
+        // Fetch all saved addresses
+        async function fetchAddresses() {
+            try {
+                const response = await fetch('/address');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch addresses');
+                }
+
+                const data = await response.json();
+                displayAddresses(data.addresses);
+
+            } catch (error) {
+                console.error(error);
+                addressContainer.textContent = 'Unable to load addresses.';
+            }
+        }
+
+        // Display addresses
+        function displayAddresses(addresses) {
+            addressContainer.replaceChildren();
+
+            if (!addresses || addresses.length === 0) {
+                const message = document.createElement('p');
+                message.className = 'empty-message';
+                message.textContent = 'No saved addresses found.';
+                addressContainer.appendChild(message);
+                return;
+            }
+
+            addresses.forEach(address => {
+                const addressElement = document.createElement('div');
+                addressElement.className = 'address-card';
+
+                const name = document.createElement('h3');
+                name.textContent = address.fullName;
+
+                const phone = document.createElement('p');
+                phone.textContent = address.phone;
+
+                const addressLine = document.createElement('p');
+                addressLine.textContent = address.addressLine;
+
+                const location = document.createElement('p');
+                location.textContent =
+                    `${address.city}, ${address.state} - ${address.pincode}`;
+
+                addressElement.append(name, phone, addressLine, location);
+
+                if (address.isDefault) {
+                    const defaultLabel = document.createElement('strong');
+                    defaultLabel.className = 'default-label';
+                    defaultLabel.textContent = 'Default Address';
+                    addressElement.appendChild(defaultLabel);
+                }
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => editAddress(address._id);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'delete-btn';
+                deleteButton.onclick = () => deleteAddress(address._id);
+
+                addressElement.append(editButton, deleteButton);
+
+                if (!address.isDefault) {
+                    const defaultButton = document.createElement('button');
+                    defaultButton.textContent = 'Set as Default';
+                    defaultButton.className = 'default-btn';
+                    defaultButton.onclick = () => setDefaultAddress(address._id);
+                    addressElement.appendChild(defaultButton);
+                }
+
+                addressContainer.appendChild(addressElement);
+            });
+        }
+
+        // Edit address
+        async function editAddress(id) {
+            try {
+                const response = await fetch('/address');
+
+                if (!response.ok) {
+                    throw new Error('Failed to fetch addresses');
+                }
+
+                const data = await response.json();
+                const address = data.addresses.find(item => item._id === id);
+
+                if (!address) {
+                    alert('Address not found');
+                    return;
+                }
+
+                selectedAddressId = id;
+
+                document.getElementById('fullName').value = address.fullName;
+                document.getElementById('phone').value = address.phone;
+                document.getElementById('addressLine').value = address.addressLine;
+                document.getElementById('city').value = address.city;
+                document.getElementById('state').value = address.state;
+                document.getElementById('pincode').value = address.pincode;
+                document.getElementById('isDefault').checked = address.isDefault;
+
+                document.getElementById('formHeading').textContent = 'Edit Address';
+                document.getElementById('saveButton').textContent = 'Update Address';
+                document.getElementById('cancelButton').style.display = 'inline-block';
+
+                addressForm.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error(error);
+                alert('Unable to load address');
+            }
+        }
+
+        // Add or update address
+        addressForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const addressData = {
+                fullName: document.getElementById('fullName').value,
+                phone: document.getElementById('phone').value,
+                addressLine: document.getElementById('addressLine').value,
+                city: document.getElementById('city').value,
+                state: document.getElementById('state').value,
+                pincode: document.getElementById('pincode').value,
+                isDefault: document.getElementById('isDefault').checked
+            };
+
+            try {
+                const method = selectedAddressId ? 'PATCH' : 'POST';
+
+                const url = selectedAddressId
+                    ? `/address/${selectedAddressId}`
+                    : '/address';
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(addressData)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.message || 'Address operation failed');
+                    return;
+                }
+
+                alert(
+                    selectedAddressId
+                        ? 'Address updated successfully!'
+                        : 'Address added successfully!'
+                );
+
+                cancelEdit();
+                await fetchAddresses();
+
+            } catch (error) {
+                console.error(error);
+                alert('Something went wrong');
+            }
+        });
+
+        // Cancel edit and reset form
+        function cancelEdit() {
+            addressForm.reset();
+            selectedAddressId = null;
+
+            document.getElementById('formHeading').textContent = 'Add New Address';
+            document.getElementById('saveButton').textContent = 'Save Address';
+            document.getElementById('cancelButton').style.display = 'none';
+        }
+
+        // Delete address
+        async function deleteAddress(id) {
+            if (!confirm('Are you sure you want to delete this address?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/address/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    alert(data.message || 'Failed to delete address');
+                    return;
+                }
+
+                alert('Address deleted successfully!');
+                await fetchAddresses();
+
+            } catch (error) {
+                console.error(error);
+                alert('Something went wrong');
+            }
+        }
+
+        // Set default address
+        async function setDefaultAddress(id) {
+            try {
+                const response = await fetch(`/address/${id}/default`, {
+                    method: 'PATCH'
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    alert(data.message || 'Failed to set default address');
+                    return;
+                }
+
+                alert('Default address set successfully!');
+                await fetchAddresses();
+
+            } catch (error) {
+                console.error(error);
+                alert('Something went wrong');
+            }
+        }
+        fetchAddresses();
+    </script>
+
+</body>
+</html>

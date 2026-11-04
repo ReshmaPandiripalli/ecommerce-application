@@ -1,0 +1,355 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Shopping Cart</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: Arial, sans-serif;
+             background: rgba(17, 25, 48, 0.92);
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 35px;
+            color: whitesmoke;
+        }
+
+        #cartItems {
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .product-card {
+            padding: 25px;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .product-image {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+
+        .product-details {
+            flex: 1;
+        }
+
+        .product-details h2 {
+            font-size: 16px;
+            margin: 8px 0;
+        }
+
+        .quantity-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        button {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quantity-btn {
+            background: #e8edf5;
+            color: #333;
+        }
+
+        .remove-btn,
+        .clear-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cart-actions {
+            max-width: 850px;
+            margin: 30px auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .total-price {
+            font-size: 22px;
+            font-weight: bold;
+            color: #a3a593;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 650px) {
+            body {
+                padding: 15px;
+            }
+
+            .product-card {
+                flex-wrap: wrap;
+            }
+
+            .cart-actions {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>My Shopping Cart</h1>
+    <div id="cartItems"></div>
+    <div class="cart-actions">
+        <button class="clear-btn" id="clearCartBtn">
+            Clear Cart
+        </button>
+        <div class="total-price" id="totalPrice">
+            Total Price: ₹0
+        </div>
+                            <button id="checkoutButton">Proceed to Checkout</button>
+
+    </div>
+    <script>
+        async function loadCart() {
+            try {
+
+                const response = await fetch("/cart", {
+                    method: "GET",
+                    credentials: "include"
+                });
+
+                const cart = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(cart.message || "Unable to load cart");
+                }
+
+                const cartItems = document.getElementById("cartItems");
+
+                cartItems.innerHTML = "";
+
+                let total = 0;
+
+                if (!cart.items || cart.items.length === 0) {
+                    cartItems.innerHTML = `
+                        <div class="empty-cart">
+                            <h2>Your cart is empty</h2>
+                        </div>
+                    `;
+                    document.getElementById("totalPrice").innerText =
+                        "Total Price: ₹0";
+                    return;
+                }
+                cart.items.forEach(item => {
+                    const product = item.product;
+                    if (!product) {
+                        return;
+                    }
+
+                    total += product.price * item.quantity;
+
+                    const card = document.createElement("div");
+
+                    card.className = "product-card";
+
+                    const image = product.images?.[0] || "";
+
+                    card.innerHTML = `
+                        <img class="product-image"
+                             src="${image}"
+                             alt="${product.name}">
+
+                        <div class="product-details">
+
+                            <h2>${product.name}</h2>
+
+                            <h2>Price: ₹${product.price}</h2>
+
+                            <div class="quantity-section">
+
+                                <button class="quantity-btn decrease-btn"
+                                        ${item.quantity <= 1 ? "disabled" : ""}>
+                                    -
+                                </button>
+
+                                <span>${item.quantity}</span>
+
+                                <button class="quantity-btn increase-btn">
+                                    +
+                                </button>
+
+                            </div>
+
+                            <p>Subtotal: ₹${product.price * item.quantity}</p>
+
+                            <button class="remove-btn">
+                                Remove
+                            </button>
+
+                        </div>
+                    `;
+                    card.querySelector(".increase-btn")
+                        .addEventListener("click", () => {
+
+                            updateQuantity(product._id, item.quantity + 1);
+
+                        });
+                    card.querySelector(".decrease-btn")
+                        .addEventListener("click", () => {
+
+                            if (item.quantity > 1) {
+                                updateQuantity(product._id, item.quantity - 1);
+                            }
+
+                        });
+                    card.querySelector(".remove-btn")
+                        .addEventListener("click", () => {
+
+                            removeProduct(product._id);
+
+                        });
+
+                    cartItems.appendChild(card);
+
+                });
+
+                document.getElementById("totalPrice").innerText =
+                    "Total Price: ₹" + total;
+                    document.getElementById("checkoutButton").addEventListener("click", () => {
+    window.location.href = "/checkout-page";
+});
+
+            } catch (error) {
+
+                console.error("Error loading cart:", error);
+
+            }
+
+        }
+        async function updateQuantity(productId, quantity) {
+
+            try {
+
+                const response = await fetch(
+                    `/cart/update/${productId}`,
+                    {
+                        method: "PATCH",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        credentials: "include",
+
+                        body: JSON.stringify({
+                            quantity: quantity
+                        })
+                    }
+                );
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || "Unable to update quantity");
+                }
+
+                await loadCart();
+
+            } catch (error) {
+
+                console.error("Update quantity error:", error);
+
+                alert(error.message);
+
+            }
+
+        }
+        async function removeProduct(productId) {
+            try {
+                const response = await fetch(
+                    `/cart/remove/${productId}`,
+                    {
+                        method: "DELETE",
+                        credentials: "include"
+                    }
+                );
+                const result = await response.json();
+                if (!response.ok) {
+                    throw new Error(result.message || "Unable to remove product");
+                }
+
+                await loadCart();
+
+            } catch (error) {
+
+                console.error("Remove product error:", error);
+
+                alert(error.message);
+
+            }
+
+        }
+        document.getElementById("clearCartBtn")
+            .addEventListener("click", async () => {
+                if (!confirm("Are you sure you want to clear your cart?")) {
+                    return;
+                }
+                try {
+                    const response = await fetch("/cart/clear", {
+                        method: "DELETE",
+                        credentials: "include"
+                    });
+
+                    const result = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(result.message || "Unable to clear cart");
+                    }
+                    await loadCart();
+                } catch (error) {
+
+                    console.error("Clear cart error:", error);
+
+                    alert(error.message);
+                }
+            });
+        loadCart();
+    </script>
+</body>
+</html>
