@@ -150,6 +150,7 @@ const forgotPassword = async (req, res) => {
         });
 
     } catch (error) {
+        console.error("Forgot password request failed:", error.code || error.name, error.responseCode || "", error.message);
         return res.status(500).json({
             message: error.message
         });
