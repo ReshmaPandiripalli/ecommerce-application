@@ -4,6 +4,7 @@ const jwt=require("jsonwebtoken");
 const dotenv=require("dotenv");
 dotenv.config();
 const crypto=require("crypto");
+const nodemailer=require("nodemailer");
 
 const cookieOptions = {
     httpOnly: true,
@@ -128,29 +129,27 @@ const forgotPassword = async (req, res) => {
             path: "/"
         });
 
-        const resendApiKey = process.env.RESEND_API_KEY;
-        const emailFrom = process.env.EMAIL_FROM;
-        if (!resendApiKey || !emailFrom) {
-            throw new Error("Email service is not configured. Set RESEND_API_KEY and EMAIL_FROM.");
+        const emailUser = process.env.EMAIL_USER;
+        const emailPass = process.env.EMAIL_PASS;
+        if (!emailUser || !emailPass) {
+            throw new Error("Email service is not configured. Set EMAIL_USER and EMAIL_PASS.");
         }
 
-        const emailResponse = await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${resendApiKey}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                from: emailFrom,
-                to: [email],
-                subject: "Password Reset OTP",
-                text: `Your password reset OTP is ${resetOtp}. It expires in 10 minutes.`
-            })
+        const transporter = nodemailer.createTransport({
+            host: "smtp.gmail.com",
+            port: 465,
+            secure: true,
+            auth: {
+                user: emailUser,
+                pass: emailPass
+            }
         });
-        const emailResult = await emailResponse.json().catch(() => ({}));
-        if (!emailResponse.ok) {
-            throw new Error(emailResult.message || `Email provider returned HTTP ${emailResponse.status}.`);
-        }
+        await transporter.sendMail({
+            from: emailUser,
+            to: email,
+            subject: "Password Reset OTP",
+            text: `Your password reset OTP is ${resetOtp}. It expires in 10 minutes.`
+        });
         return res.status(200).json({
             message: "OTP sent successfully"
         });
